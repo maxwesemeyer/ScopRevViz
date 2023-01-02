@@ -7,9 +7,9 @@
 # Eventuell neue Plots mit Kategorien pro Jahr 
 
 
-#Datasets combined zusammengefasst ca. 20 keine Kategorie
+#Datasets combined zusammengefasst 3 keine Kategorie
 
-# Finale Tabelle rausschreiben. welches skript und wie? 
+# Finale Tabelle rausschreiben. welches skript? 
 # Welche Tabellen sollen geteilt werden? Metadaten mit Exlusions?
 
 # numbers for FLowchart; Zahlen anpassen
@@ -18,14 +18,18 @@
 # papers wieder includieren und aus dem exlusion datensatz nehmen 
 # DONE
 
-# TODO Datasets kategorisieren dokumentieren
+# TODO Datasets kategorisieren dokumentieren Text; 
+# Doppelte Klassifizierung wird überschriebe aktuell
+
 
 # TODO Tabelle wie im Protocol Paper zu yes/no und thematic usw. Großbuchstabe 
 # am Anfang
+# str_to_title() -> erster Buchstabe zu Großbuchstabe
+
+# Projekt teilen via Gitbucket
+# DONE
 
 # TODO Fließtext
-
-# TODO Projekt teilen via Gitbucket
 
 # Nach EAAE:
 # TODO Indicatoren aufräumen

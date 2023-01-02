@@ -7,8 +7,8 @@ datasets_all <- read.csv('input/datasets_all.csv', sep=';', encoding = 'UTF-8')
 unique(datasets_all$Dataset.combined.with.IACS..text.) %>% length()
 unique(datasets_all$Dataset.combined.with.IACS..text.) 
 # create a new column with thematically summarized Dataset categories
-datasets_all[str_detect(datasets_all$Dataset.combined.with.IACS..text., regex('sat', ignore_case = TRUE)), "Dataset_comb_agg"] <- "remote sensing data"
-datasets_all[str_detect(datasets_all$Dataset.combined.with.IACS..text., regex('aer', ignore_case = TRUE)), "Dataset_comb_agg"] <- "remote sensing data"
+datasets_all[str_detect(datasets_all$Dataset.combined.with.IACS..text., regex('satellit', ignore_case = TRUE)), "Dataset_comb_agg"] <- "remote sensing data"
+datasets_all[str_detect(datasets_all$Dataset.combined.with.IACS..text., regex('aerial', ignore_case = TRUE)), "Dataset_comb_agg"] <- "remote sensing data"
 datasets_all[str_detect(datasets_all$Dataset.combined.with.IACS..text., regex('sensing', ignore_case = TRUE)), "Dataset_comb_agg"] <- "remote sensing data"
 datasets_all[str_detect(datasets_all$Dataset.combined.with.IACS..text., regex('modis', ignore_case = TRUE)), "Dataset_comb_agg"] <- "remote sensing data"
 datasets_all[str_detect(datasets_all$Dataset.combined.with.IACS..text., regex('sentinel', ignore_case = TRUE)), "Dataset_comb_agg"] <- "remote sensing data"
@@ -25,9 +25,9 @@ datasets_all[str_detect(datasets_all$Dataset.combined.with.IACS..text., regex('p
 datasets_all[str_detect(datasets_all$Dataset.combined.with.IACS..text., regex('runoff', ignore_case = TRUE)), "Dataset_comb_agg"] <- "soil data"
 
 datasets_all[str_detect(datasets_all$Dataset.combined.with.IACS..text., regex('clima', ignore_case = TRUE)), "Dataset_comb_agg"] <- "climate data"
-datasets_all[str_detect(datasets_all$Dataset.combined.with.IACS..text., regex('preci', ignore_case = TRUE)), "Dataset_comb_agg"] <- "climate data"
+datasets_all[str_detect(datasets_all$Dataset.combined.with.IACS..text., regex('precipitation', ignore_case = TRUE)), "Dataset_comb_agg"] <- "climate data"
 datasets_all[str_detect(datasets_all$Dataset.combined.with.IACS..text., regex('rainfall', ignore_case = TRUE)), "Dataset_comb_agg"] <- "climate data"
-datasets_all[str_detect(datasets_all$Dataset.combined.with.IACS..text., regex('meteo', ignore_case = TRUE)), "Dataset_comb_agg"] <- "climate data"
+datasets_all[str_detect(datasets_all$Dataset.combined.with.IACS..text., regex('meteorological', ignore_case = TRUE)), "Dataset_comb_agg"] <- "climate data"
 
 datasets_all[str_detect(datasets_all$Dataset.combined.with.IACS..text., regex('habitat', ignore_case = TRUE)), "Dataset_comb_agg"] <- "biodiversity data"
 datasets_all[str_detect(datasets_all$Dataset.combined.with.IACS..text., regex('wild', ignore_case = TRUE)), "Dataset_comb_agg"] <- "biodiversity data"
@@ -59,7 +59,7 @@ datasets_all[str_detect(datasets_all$Dataset.combined.with.IACS..text., regex('a
 datasets_all[str_detect(datasets_all$Dataset.combined.with.IACS..text., regex('cost', ignore_case = TRUE)), "Dataset_comb_agg"] <- "economic/agronomic data"
 datasets_all[str_detect(datasets_all$Dataset.combined.with.IACS..text., regex('yield', ignore_case = TRUE)), "Dataset_comb_agg"] <- "economic/agronomic data"
 datasets_all[str_detect(datasets_all$Dataset.combined.with.IACS..text., regex('harv', ignore_case = TRUE)), "Dataset_comb_agg"] <- "economic/agronomic data"
-datasets_all[str_detect(datasets_all$Dataset.combined.with.IACS..text., regex('marg', ignore_case = TRUE)), "Dataset_comb_agg"] <- "economic/agronomic data"
+datasets_all[str_detect(datasets_all$Dataset.combined.with.IACS..text., regex('margin', ignore_case = TRUE)), "Dataset_comb_agg"] <- "economic/agronomic data"
 datasets_all[str_detect(datasets_all$Dataset.combined.with.IACS..text., regex('manage', ignore_case = TRUE)), "Dataset_comb_agg"] <- "economic/agronomic data"
 datasets_all[str_detect(datasets_all$Dataset.combined.with.IACS..text., regex('LFA', ignore_case = TRUE)), "Dataset_comb_agg"] <- "economic/agronomic data"
 
@@ -67,8 +67,8 @@ datasets_all[str_detect(datasets_all$Dataset.combined.with.IACS..text., regex('w
 datasets_all[str_detect(datasets_all$Dataset.combined.with.IACS..text., regex('irrig', ignore_case = TRUE)), "Dataset_comb_agg"] <- "hydrological data"
 datasets_all[str_detect(datasets_all$Dataset.combined.with.IACS..text., regex('hydro', ignore_case = TRUE)), "Dataset_comb_agg"] <- "hydrological data"
 
-datasets_all[str_detect(datasets_all$Dataset.combined.with.IACS..text., regex('inter', ignore_case = TRUE)), "Dataset_comb_agg"] <- "qualitative data"
-datasets_all[str_detect(datasets_all$Dataset.combined.with.IACS..text., regex('quest', ignore_case = TRUE)), "Dataset_comb_agg"] <- "qualitative data"
+datasets_all[str_detect(datasets_all$Dataset.combined.with.IACS..text., regex('interview', ignore_case = TRUE)), "Dataset_comb_agg"] <- "qualitative data"
+datasets_all[str_detect(datasets_all$Dataset.combined.with.IACS..text., regex('questionnaire', ignore_case = TRUE)), "Dataset_comb_agg"] <- "qualitative data"
 datasets_all[str_detect(datasets_all$Dataset.combined.with.IACS..text., regex('qualitative', ignore_case = TRUE)), "Dataset_comb_agg"] <- "qualitative data"
 
 datasets_all[str_detect(datasets_all$Dataset.combined.with.IACS..text., regex('statis', ignore_case = TRUE)), "Dataset_comb_agg"] <- "statistical data"
@@ -92,12 +92,12 @@ datasets_all[is.na(datasets_all$Dataset_comb_agg),"Dataset.combined.with.IACS..t
 datasets_all$Dataset_comb_agg %>% is.na() %>% sum()
 # TODO GPS nachschauen im Paper, andere 3 rauswerfen mapy und OSM zusammenfassen
 
-
+datasets_all$Dataset_comb_agg <- str_to_title(datasets_all$Dataset_comb_agg)
 ################################################################################
-datasets_all %>% group_by(Dataset_comb_agg) %>% summarise(count=n()) %>% arrange(desc(count)) %>%
-  rename(., 'dataset combined' = 'Dataset_comb_agg') %>% kbl() %>%
-  kable_classic_2(full_width=FALSE) #%>% 
-  save_kable("output/tables_allMeta/exclusion_r_table.png", zoom = 5)
+datasets_all %>% group_by(Dataset_comb_agg) %>% summarise(Count=n()) %>% arrange(desc(Count)) %>%
+  rename(., 'Dataset combined' = 'Dataset_comb_agg') %>% kbl() %>%
+  kable_classic_2(full_width=FALSE) %>% 
+  save_kable("output/tables_allMeta/Datasets_combined_categories.png", zoom = 5)
 
 
 
