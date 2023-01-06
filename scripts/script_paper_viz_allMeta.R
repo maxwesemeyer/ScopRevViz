@@ -163,7 +163,8 @@ paper$exclusion..reason
 set.seed(73829)
 paper[which(paper$Journal=="Remote Sensing"),"categories_scimagojr"]
 paper[which(paper$Journal=="Remote Sensing"),"categories_scimagojr_corrected"]
-
+paper$Journal <- tolower(paper$Journal)
+paper$Journal <- str_to_title(paper$Journal)
 ####################################
 #include these papers again that had no exclusion reason and were checked
 # again at 15.12.22
@@ -311,13 +312,14 @@ cts <- data.frame(table(as.factor(paper$Journal)))
 cat_years <- data.frame('year' = paper$year, 'cat' = paper$Journal)
 grouped <- cat_years %>% group_by(cat, year) %>% summarise(n = n())
 grouped <- cat_years %>% group_by(cat) %>% summarise(n = n())
-grouped[grouped$cat == 'International Journal of Applied Earth Observation and Geoinformation', "cat"] = "Int. J. Appl. Earth Obs. Geoinf."
-grouped[grouped$cat == 'Environmental Monitoring and Assessment', "cat"] = "Environmental Monitoring & Assessment"
+grouped[grouped$cat == 'International Journal Of Applied Earth Observation And Geoinformation', "cat"] = "Int. J. Appl. Earth Obs. Geoinf."
+grouped[grouped$cat == 'Environmental Monitoring And Assessment', "cat"] = "Environmental Monitoring & Assessment"
 
-ordered <- grouped[order(grouped$n, decreasing = T)[1:30],] 
+ordered <- grouped[order(grouped$n, decreasing = T),]
+ordered <- ordered[which(ordered$n > 2),]
 ordered$cat <- factor(ordered$cat, levels=ordered$cat)
 
-jpeg("output/figures_plots_allMeta/most_freq_journals.jpeg", 
+jpeg("output/figures_plots_allMeta/most_freq_journals_ct_bigger_2.jpeg", 
      
      width = 20, height = 15, quality = 100, units = "cm",res= 300,
      

@@ -7,7 +7,7 @@
 # Eventuell neue Plots mit Kategorien pro Jahr 
 
 
-#Datasets combined zusammengefasst 3 keine Kategorie
+#Datasets combined zusammengefasst; 2 keine Kategorie weil unclear
 
 # Finale Tabelle rausschreiben. welches skript? 
 # Welche Tabellen sollen geteilt werden? Metadaten mit Exlusions?
@@ -19,14 +19,14 @@
 # DONE
 
 # TODO Datasets kategorisieren dokumentieren Text; 
-# Doppelte Klassifizierung wird überschriebe aktuell
-
+# Doppelte Klassifizierung wird eventuell überschrieben aktuell
+# Was tun wenn Datensatz nicht angegeben ist ? z.B. land cover data? 
 
 # TODO Tabelle wie im Protocol Paper zu yes/no und thematic usw. Großbuchstabe 
 # am Anfang
 # str_to_title() -> erster Buchstabe zu Großbuchstabe
 
-# Projekt teilen via Gitbucket
+# Projekt teilen via Gitbucket -> Github
 # DONE
 
 # TODO Fließtext
