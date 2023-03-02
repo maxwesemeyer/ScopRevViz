@@ -31,6 +31,12 @@
 
 # TODO Fließtext
 
+# 16.1
+# Done! flow chart update 
+# Done! MEtadaten Abstract Wordclouds mehr Wörter; Sample Abstract Wordcloud mehr Wörter
+# TODO NAs nachsehen im Paper -> both unclear -> Remove 
+# TODO Paper zusammen kopieren 
+# TODO + Flowchart; Details zur Suchstrategie und Ergebnissen 
 # Nach EAAE:
 # TODO Indicatoren aufräumen
 
@@ -42,6 +48,13 @@ library(dplyr)
 extraction_all <- read.csv('input/Extraction_sheet_all.csv', sep=';', encoding = 'UTF-8')
 indicators_all <- read.csv('input/indicators_all.csv', sep=';', encoding = 'UTF-8')
 datasets_all <- read.csv('input/datasets_all.csv', sep=';', encoding = 'UTF-8')
+####################################
+# find water and medical papers
+
+water_sub <- extraction_all[str_detect(extraction_all$Title, 'ater'),]
+health_sub <- extraction_all[str_detect(extraction_all$Abstract, 'ealth'),]
+health_sub <- extraction_all[str_detect(extraction_all$Abstract, 'edicine'),]
+
 
 ################################################################################
 # some preprocessing of the Dataset

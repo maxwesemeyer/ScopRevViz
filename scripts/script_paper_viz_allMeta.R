@@ -165,6 +165,7 @@ paper[which(paper$Journal=="Remote Sensing"),"categories_scimagojr"]
 paper[which(paper$Journal=="Remote Sensing"),"categories_scimagojr_corrected"]
 paper$Journal <- tolower(paper$Journal)
 paper$Journal <- str_to_title(paper$Journal)
+
 ####################################
 #include these papers again that had no exclusion reason and were checked
 # again at 15.12.22

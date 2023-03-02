@@ -4,7 +4,7 @@ library(ggplot2)
 library(dplyr)
 library(stringr)
 library(kableExtra)
-
+library(tidyr)
 datasets_all <- read.csv('input/datasets_all.csv', sep=';', encoding = 'UTF-8')
 datasets_all[str_detect(datasets_all$Dataset.combined.with.IACS..text., regex('GPS ', ignore_case = TRUE)), "Dataset.combined.with.IACS..text."] <- 'GPS points of Land use land cover ground truth information '
 ################################################################################
@@ -197,7 +197,7 @@ datasets_all[str_detect(datasets_all$Dataset.combined.with.IACS..text., regex('O
 
 
 datasets_all[str_detect(datasets_all$Dataset.combined.with.IACS..text., regex('growth ', ignore_case = TRUE)), "Dataset.combined.with.IACS..text."] 
-
+datasets_all <- drop_na(datasets_all)
 # All datsets without category yet
 datasets_all[is.na(datasets_all$Dataset_comb_agg),"Dataset.combined.with.IACS..text."]
 datasets_all$Dataset_comb_agg %>% is.na() %>% sum()
