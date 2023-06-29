@@ -224,3 +224,4 @@ aut_check$authors_corrected[278]
 aut_check[aut_check$authors == "['Demarez, Valérie', 'Florian, Helen', 'Marais-Sicre, Claire', 'Baup, Frédéric']", "authors_corrected"] <-
   "['Demarez; V', 'Florian; H', 'Marais-Sicre; C', 'Baup; F']"
 aut_check$authors_corrected[279]
+

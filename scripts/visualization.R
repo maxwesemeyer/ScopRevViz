@@ -43,11 +43,12 @@
 ################################################################################
 library(ggplot2)
 library(dplyr)
+library(stringr)#
+library(kableExtra)
 
-
-extraction_all <- read.csv('input/Extraction_sheet_all.csv', sep=';', encoding = 'UTF-8')
-indicators_all <- read.csv('input/indicators_all.csv', sep=';', encoding = 'UTF-8')
-datasets_all <- read.csv('input/datasets_all.csv', sep=';', encoding = 'UTF-8')
+extraction_all <- read.csv('input/all_extracted_Heidis_Nacharbeit_.csv', sep=',', encoding = 'UTF-8')
+#indicators_all <- read.csv('input/indicators_all.csv', sep=';', encoding = 'UTF-8')
+#datasets_all <- read.csv('input/datasets_all.csv', sep=';', encoding = 'UTF-8')
 ####################################
 # find water and medical papers
 
@@ -133,6 +134,7 @@ spatial_unit_analysis[spatial_unit_analysis == 'study region']  = 'region'
 spatial_unit_analysis[spatial_unit_analysis == 'network of plots']  = 'network of plots/farms'
 spatial_unit_analysis[spatial_unit_analysis == 'network of farms']  = 'network of plots/farms'
 spatial_unit_analysis[spatial_unit_analysis == 'habitat and land-use polygons']  = 'habitat'
+spatial_unit_analysis[spatial_unit_analysis == 'study sites']  = 'landscape'
 
 table(spatial_unit_analysis)
 table(spatial_unit_analysis) %>% 
@@ -259,4 +261,5 @@ extraction_all %>% group_by(Raw.info.used..location) %>%
 
 extraction_all %>% group_by(Raw.info.used..time) %>% 
   summarise(n = n())
+
 

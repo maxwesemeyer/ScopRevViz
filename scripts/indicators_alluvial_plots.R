@@ -6,10 +6,12 @@ library(stringr)
 # load data and prepare
 
 
-indicators_all <- read.csv('input/indicators_all.csv', sep=';', encoding = 'UTF-8')
+indicators_all <- read.csv('input/indicators_list_HL_2.csv', sep=',', encoding = 'UTF-8')
 indicators_all$Indicandum..text.
+indicators_all <- na.omit(indicators_all)
 ################################################################################
 # reclassify indicators in new column 
+"""
 indicators_all[str_detect(indicators_all$Indicator.Name..text., regex('proport', ignore_case = TRUE)), "Indicator_recl"] <- "Proportion of ..."
 indicators_all[str_detect(indicators_all$Indicator.Name..text., regex('share', ignore_case = TRUE)), "Indicator_recl"] <- "Proportion of ..."
 indicators_all[str_detect(indicators_all$Indicator.Name..text., regex('amount', ignore_case = TRUE)), "Indicator_recl"] <- "Proportion of ..."
@@ -56,17 +58,11 @@ indicators_all[str_detect(indicators_all$Indicandum..text., regex('soil erodibil
 
 indicators_all[str_detect(indicators_all$Indicandum..text., regex('crops', ignore_case = TRUE)), "Indicandum..text."] 
 
-
+"""
 ################################################################################
 
 
-
-
-
-
-
-
-indicators <- indicators_all[,c("Indicator_recl", "Indicandum_recl")]
+indicators <- indicators_all[,c("Indicator..short.", "Indicandum.group")]
 colnames(indicators) <- c("Indicator.group", "Indicandum.group")
 ind.df <- data.table(table(indicators))
 
@@ -75,7 +71,7 @@ ggplot(ind.df[N > 0],
        aes(y = N, axis1 = Indicator.group, axis2 = Indicandum.group)) +
   geom_alluvium(aes(fill = Indicandum.group), width = 1/6, alpha = .75, curve_type = "cubic") +
   geom_stratum(width = 1/4, fill = "white", color = "black") +
-  geom_text(stat = "stratum", aes(label = after_stat(stratum)), size = 5.2) +
+  geom_text(stat = "stratum", aes(label = after_stat(stratum)), size = 2) +
   scale_x_discrete(limits = c("Indicators", "Indicanda"), expand = c(.05, .05)) +
   #scale_fill_brewer(type = "qual", palette = "Set1") +
   ggtitle("Indicators and indicanda in the sample papers") +
@@ -83,15 +79,15 @@ ggplot(ind.df[N > 0],
   # scale_fill_paletteer_d("colorBlindness::paletteMartin") +
   # theme_void() +
   theme_classic() +
-  theme(plot.title = element_text(size = 20, face = "bold"),
+  theme(plot.title = element_text(size = 18, face = "bold"),
         axis.ticks = element_blank(),
         axis.line.x = element_blank(),
-        axis.text.x = element_text(size = 20, color = "black"),
+        axis.text.x = element_text(size = 18, color = "black"),
         axis.title.y = element_blank(),
         axis.line.y = element_blank(),
         axis.text.y = element_blank(),
-        legend.title = element_text(size = 20),
-        legend.text = element_text(size = 15),
+        legend.title = element_text(size = 15),
+        legend.text = element_text(size = 11),
         legend.key.size = unit(1, 'cm')) +
   guides(fill = guide_legend(title = "Indicanda"))
 

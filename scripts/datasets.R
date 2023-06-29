@@ -1,12 +1,23 @@
 ################################################################################
-# Offensichtliche Dinge zusammenfassen; Neue spalte am besten
+#
 library(ggplot2)
 library(dplyr)
 library(stringr)
 library(kableExtra)
 library(tidyr)
-datasets_all <- read.csv('input/datasets_all.csv', sep=';', encoding = 'UTF-8')
-datasets_all[str_detect(datasets_all$Dataset.combined.with.IACS..text., regex('GPS ', ignore_case = TRUE)), "Dataset.combined.with.IACS..text."] <- 'GPS points of Land use land cover ground truth information '
+datasets_all <- read.csv('input/datasets_list_HL_2.csv', sep=',', encoding = 'UTF-8')
+datasets_all[is.na(datasets_all$linked.by),"linked.by"] <- 'other'
+datasets_all[str_detect(datasets_all$linked.by, regex('spatial match', ignore_case = TRUE)), "linked.by"] <- 'spatial match'
+datasets_all[str_detect(datasets_all$linked.by, regex('farm', ignore_case = TRUE)), "linked.by"] <- 'farm'
+datasets_all[str_detect(datasets_all$Dataset.group, regex('LULC', ignore_case = TRUE)), "Dataset.group"] <- 'LULC data'
+datasets_all[str_detect(datasets_all$Dataset.group, regex('hydro', ignore_case = TRUE)), "Dataset.group"] <- 'hydrological data'
+datasets_all[str_detect(datasets_all$Dataset.group, regex('statistical', ignore_case = TRUE)), "Dataset.group"] <- 'statistical and economic data'
+datasets_all[str_detect(datasets_all$Dataset.group, regex('ecological data', ignore_case = TRUE)), "Dataset.group"] <- 'ecological data'
+datasets_all[str_detect(datasets_all$Dataset.group, regex('climate', ignore_case = TRUE)), "Dataset.group"] <- 'climate and weather data'
+datasets_all[str_detect(datasets_all$Dataset.group, regex('other', ignore_case = TRUE)), "Dataset.group"] <- 'other data'
+datasets_all[str_detect(datasets_all$Dataset.group, regex('cadastral', ignore_case = TRUE)), "Dataset.group"] <- 'cadastral data'
+
+#datasets_all[str_detect(datasets_all$Dataset.combined.with.IACS..text., regex('GPS ', ignore_case = TRUE)), "Dataset.combined.with.IACS..text."] <- 'GPS points of Land use land cover ground truth information '
 ################################################################################
 # correct the dataset combined column 
 datasets_all[str_detect(datasets_all$Dataset.combined.with.IACS..text., regex('land-use map derived from', ignore_case = TRUE)), "Dataset.combined.with.IACS..text."] <- "land-use map"
@@ -204,13 +215,24 @@ datasets_all$Dataset_comb_agg %>% is.na() %>% sum()
 # TODO GPS nachschauen im Paper # DONE # , andere 2 rauswerfen mapy und OSM zusammenfassen
 
 datasets_all$Dataset_comb_agg <- str_to_title(datasets_all$Dataset_comb_agg)
+
+write.csv(datasets_all, 'datasets_out.csv')
 ################################################################################
 datasets_all %>% group_by(Dataset_comb_agg) %>% summarise(Count=n()) %>% arrange(desc(Count)) %>%
   rename(., 'Dataset combined' = 'Dataset_comb_agg') %>% kbl() %>%
   kable_classic_2(full_width=FALSE) %>% 
   save_kable("output/tables/Datasets_combined_categories.png", zoom = 5)
 
+datasets_all %>% group_by(Dataset.group) %>% summarise(Count=n()) %>% arrange(desc(Count)) %>%
+  rename(., 'Dataset combined' = 'Dataset.group') %>% kbl() %>%
+  kable_classic_2(full_width=FALSE) %>% 
+  save_kable("output/tables/Datasets_combined_categories.png", zoom = 5)
 
+
+datasets_all %>% group_by(linked.by) %>% summarise(Count=n()) %>% 
+  arrange(desc(Count)) %>% rename(., 'linked by' = 'linked.by') %>% kbl() %>%
+  kable_classic_2(full_width=FALSE) %>% 
+  save_kable("output/tables/linkedby.png", zoom = 5)
 ################################################################################
 # reclassify Link for combination
 
@@ -238,6 +260,9 @@ datasets_all %>% group_by(Dataset_comb_agg, link.for.combination..e.g...spatial.
   kbl() %>%
   kable_classic_2(full_width=FALSE) %>% 
   save_kable("output/tables/Link_f_comb_dataset.png",  zoom = 2)
+
+
+
 
 
 

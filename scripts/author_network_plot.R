@@ -16,7 +16,7 @@ library(manipulate)
 setwd("D:/ForLand")
 getwd()
 
-paper = read.csv('input/test_corrected_Heidi_included_utf8.txt', sep=';', encoding="UTF-8")
+paper = read.csv('input/Meta_all/test_corrected_Heidi_included_utf8.txt', sep=';', encoding="UTF-8")
 paper$exclusion..reason
 set.seed(73829)
 paper[which(paper$Journal=="Remote Sensing"),"categories_scimagojr"]
