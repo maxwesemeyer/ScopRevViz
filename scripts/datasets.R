@@ -262,12 +262,3 @@ datasets_all %>% group_by(Dataset_comb_agg, link.for.combination..e.g...spatial.
   save_kable("output/tables/Link_f_comb_dataset.png",  zoom = 2)
 
 
-
-
-
-
-3* (902.93) + 3* (878.26) + 6* (851.48)
-
-46.98*3+28.19+15.13+28.35+45.77*2
-
-9*50 + 52
