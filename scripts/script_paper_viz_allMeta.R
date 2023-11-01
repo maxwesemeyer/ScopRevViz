@@ -3,8 +3,8 @@ library(dplyr)
 library(stringr)
 library(kableExtra)
 library(magick)
-library(RColorBrewer)
 # webshot::install_phantomjs()
+
 ################################################################################
 # numbers
 """
@@ -27,14 +27,17 @@ Does land fragmentation...
 """
 
 ################################################################################
+setwd("D:/ForLand/2_coauthor_network")
+getwd()
+
 # read the csv including the exclusion to extract the exclusion reason
-paper = read.csv('input/Meta_all/papers_and_exlusions.csv', sep=',', encoding="UTF-8")
+paper = read.csv('input/papers_and_exlusions.csv', sep=',', encoding="UTF-8")
 ################################################################################
 # Change exclusion.yes.no to "yes" for the three papers we excluded in the chartig process
 
 paper[which(paper$authors=="['Quendler, Erika']" | 
-               paper$authors=="['Lawson, Gerry', 'Dupraz, Christian', 'Watté, Jeroen']" |
-               paper$authors=="['Schmitzberger, I', 'Wrbka, Th.', 'Steurer, B', 'Aschenbrenner, G', 'Peterseil, J', 'Zechmeister, H G']"),"exclusion.yes.no"] <- "yes"
+              paper$authors=="['Lawson, Gerry', 'Dupraz, Christian', 'Watté, Jeroen']" |
+              paper$authors=="['Schmitzberger, I', 'Wrbka, Th.', 'Steurer, B', 'Aschenbrenner, G', 'Peterseil, J', 'Zechmeister, H G']"),"exclusion.yes.no"] <- "yes"
 
 ################################################################################
 # Change exclusion.yes.no to "no" for the four papers we included again, when checking
@@ -52,9 +55,9 @@ paper[which(paper$doi.url=="https://doi.org/10.1016/j.ecolecon.2021.107044"  |
 ########
 # exclude the ones Heidi included again...
 ex_list = c("['Bogaerts, Theo', 'Williamson, Ian P', 'Fendel, Elfriede M']",
-"['Inan, Hall Ibrahim', 'Sagris, Valentina', 'Devos, Wim', 'Milenov, Pavel', 'van Oosterom, Peter', 'Zevenbergen, Jaap']",
-                                                                                                         "['Sládková, J']",
-                                   "['Neumann, Barbara', 'Lütz, Michael', 'Schüpbach, Beatrice', 'Szerencsits, Erich']")
+            "['Inan, Hall Ibrahim', 'Sagris, Valentina', 'Devos, Wim', 'Milenov, Pavel', 'van Oosterom, Peter', 'Zevenbergen, Jaap']",
+            "['Sládková, J']",
+            "['Neumann, Barbara', 'Lütz, Michael', 'Schüpbach, Beatrice', 'Szerencsits, Erich']")
 paper[which(paper$authors %in% ex_list),"exclusion.yes.no"] <- "no"
 # 151 (after charting: 154) (after checking exclusion reasons 150)
 
@@ -347,15 +350,15 @@ paper[paper$authors== "['Delattre, Laurence', 'Debolini, Marta', 'Paoli, Jean Ch
   "['Delattre, L'; 'Debolini, M'; 'Paoli, J C'; 'Napoleone, C'; 'Moulery, M'; 'Leonelli, L'; 'Santucci, P']"
 
 paper[paper$authors== "['MURGUE  Romain ; Vavasseur, Maroussia ; Burger-Leenhardt, Delphine ; Therond, Olivier, Clément ; Lardy']", "authors_corrected"] <-
-"['Murgue, Clément'; 'Lardy, Romain';'Vavasseur, Maroussia'; 'Burger-Leenhardt, Delphine D.'; 'Therond, Olivier']"
+  "['Murgue, Clément'; 'Lardy, Romain';'Vavasseur, Maroussia'; 'Burger-Leenhardt, Delphine D.'; 'Therond, Olivier']"
 
 
 paper[paper$authors== "['Rivers-Moore, Justine', 'Andrieu, Emilie', 'Vialatte, Aude', 'Ouin, Annie']", "authors_corrected"] <-
-"['Rivers-Moore, Justine'; 'Andrieu, Emilie'; 'Vialatte, Aude'; 'Ouin, Annie']"
+  "['Rivers-Moore, Justine'; 'Andrieu, Emilie'; 'Vialatte, Aude'; 'Ouin, Annie']"
 
 
 paper[paper$authors=="['Vincente-Vincente, Jose Luis', 'Sanz-Sanz, Esther', 'Napoléone, Claude', 'Moulery, Michel', 'Piorr, Annette']", "authors_corrected"] <-
-"['Vincente-Vincente, Jose Luis'; 'Sanz-Sanz, Esther'; 'Napoléone, Claude'; 'Moulery, Michel'; 'Piorr, Annette']"
+  "['Vincente-Vincente, Jose Luis'; 'Sanz-Sanz, Esther'; 'Napoléone, Claude'; 'Moulery, Michel'; 'Piorr, Annette']"
 
 ################################################################################
 authors = c()
@@ -404,8 +407,8 @@ ordered %>% ggplot(., aes(y=n, x=cat)) + geom_boxplot() + theme_bw() +
 
 dev.off()
 #,
-        #axis.text.x=element_blank(),
-        #axis.ticks.x=element_blank())
+#axis.text.x=element_blank(),
+#axis.ticks.x=element_blank())
 
 
 
@@ -444,15 +447,11 @@ jpeg("output/figures_plots_allMeta/year_pub_country.jpeg",
 counted_yr_country$country <- factor(counted_yr_country$country, 
                                      levels = c("AT", "CZ", "DE", "FR", "SE", "other"))
 
-ggplot(counted_yr_country, aes( x=year, y=ct, fill=country)) + 
-  #geom_col(position = "stack") +
+ggplot(counted_yr_country, aes(fill=country, y=ct, x=year)) + 
+  scale_x_continuous(breaks=2002:2021) +
+  geom_bar(position="stack", stat="identity") + 
   geom_col(position = "stack") +
-  
-  ylab("count") + 
-  scale_x_continuous(breaks=seq(2002, 2021, 1))+
-  theme_bw() +
-  theme(axis.text.x = element_text(angle = 45, vjust = 0.5, hjust=0.5)) +
-  scale_fill_brewer(palette="Set2")
+  ylab("count") + theme_bw()
 
 dev.off()
 ################################################################################
@@ -461,5 +460,4 @@ dev.off()
 paper %>% group_by(country) %>% summarise(count=n()) %>% arrange(desc(count)) %>%
   kbl() %>% kable_classic_2(full_width=FALSE) %>% 
   save_kable("output/tables_allMeta/country_cts.png", zoom = 5)
-
 

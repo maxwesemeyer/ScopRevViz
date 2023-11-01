@@ -1,100 +1,61 @@
 # Author Network plot
 
-#library(scholar) # Provides functions to extract citation data from Google Scholar
 library(networkDynamic)
 library(ndtv)
-library(statnet)
 library(igraph)
+library(statnet)
 library(intergraph)
 library(visNetwork)
 library(stringr)
 library(dplyr)
 library(tidyr)
 library(manipulate)
+library(openxlsx)
 
-################################################################################
-setwd("D:/ForLand")
-getwd()
+# Papers-Quantity pro Autor and Countries as categorie
+authors_title_country <- paper[, c("authors_corrected", "title", "country")]
+authors_counter <- separate_rows(authors_title_country, authors_corrected, sep = ",") ##ACA CADA AUTOR QUEDA CON SUS PUBLICACIONES Y PAISES DE C/PUBLICAC.
 
-paper = read.csv('input/Meta_all/test_corrected_Heidi_included_utf8.txt', sep=';', encoding="UTF-8")
-paper$exclusion..reason
-set.seed(73829)
-paper[which(paper$Journal=="Remote Sensing"),"categories_scimagojr"]
-paper[which(paper$Journal=="Remote Sensing"),"categories_scimagojr_corrected"]
-paper$Journal <- tolower(paper$Journal)
-paper$Journal <- str_to_title(paper$Journal)
+authors_counter$authors_corrected <- str_replace_all(authors_counter$authors_corrected, "[[:punct:]]", "") ##PUNTUACION DE AUTORES WEG
+authors_counter$authors_corrected <- apply(authors_counter["authors_corrected"], 1, function(x) gsub("^\\s+", "", x)) ##ELIMINA ESPACIO VACIO AL INICIO
 
-####################################
-#include these papers again that had no exclusion reason and were checked
-# again at 15.12.22
-# "https://doi.org/10.1016/j.ecolecon.2021.107044"    
-# "http://dx.doi.org/10.17221/143/2014-SWR"   
-# "https://doi.org/10.1016/j.agee.2016.09.025"       
-# "http://dx.doi.org/10.3390/rs11020118"         
+# authors with various countries
+df_countries_group <- aggregate(country ~ authors_corrected, data = authors_counter, FUN = function(x) paste(unique(x), collapse = ", ")) ##A C/AUTOR SE LE ASIGNAN SUS PAISES
+df_countries_group2 <- df_countries_group[grepl(",", df_countries_group$country), ] ##SOLO AUTORES CON VARIOS PAISES
+rownames(df_countries_group2) <- NULL
 
-paper_all = read.csv('input/papers_and_exlusions.csv', sep=',', encoding="UTF-8")
-include <- paper_all[which(paper_all$doi.url == "https://doi.org/10.1016/j.ecolecon.2021.107044" ),]
-include <- rbind(include, paper_all[which(paper_all$doi.url == "http://dx.doi.org/10.17221/143/2014-SWR"  ),])
-include <- rbind(include, paper_all[which(paper_all$doi.url == "https://doi.org/10.1016/j.agee.2016.09.025" ),])
-include <- rbind(include, paper_all[which(paper_all$doi.url == "http://dx.doi.org/10.3390/rs11020118"),])
-include$authors_corrected <- c("['Karner, Katrin'; 'Schmid, Erwin'; 'Schneider, Uwe A'; 'Mitter, Hermine']",
-                               "['Podhrázská, J'; 'Kučera, J'; 'Karásek, P'; 'Konečná, J']",
-                               "['Lundin, Ola'; 'Rundlöf, Maj'; 'Smith, Henrik G'; 'Bommarco, Riccardo']",
-                               "['Demarez, Valérie'; 'Florian, Helen'; 'Marais-Sicre, Claire'; 'Baup, Frédéric']")
-include$categories_scimagojr <- c("Economics and Econometrics (Q1); Environmental Science (miscellaneous) (Q1)",
-                                  "Aquatic Science (Q2); Soil Science (Q2)",
-                                  "Agronomy and Crop Science (Q1); Animal Science and Zoology (Q1); Ecology (Q1)",
-                                  "Earth and Planetary Sciences (miscellaneous) (Q1)")
-include$categories_scimagojr_corrected <- c("['Economics and Econometrics', ' Environmental Science (miscellaneous)']",
-                                            "['Aquatic Science', ' Soil Science']",
-                                            "['Agronomy and Crop Science', ' Animal Science and Zoology', ' Ecology']",
-                                            "['Earth and Planetary Sciences (miscellaneous)']")
-colnames(include) <- colnames(paper)
-include$exclusion.yes.no <- 'no'
-
-paper <- rbind(paper, include)
-
-####################################
-# remove papers that have been removed during the Charting process of the 60 Papers
-# 1 of Stefan, 1 of Andreas, 1 of Franziska
-#replacer <- function(x) {
-#  return(str_replace_all(x, "[[:punct:]]", ""))
-#}
-
-paper <- paper[-which(paper$authors=="['Quendler, Erika']" | 
-                        paper$authors=="['Lawson, Gerry', 'Dupraz, Christian', 'Watté, Jeroen']" |
-                        paper$authors=="['Schmitzberger, I', 'Wrbka, Th.', 'Steurer, B', 'Aschenbrenner, G', 'Peterseil, J', 'Zechmeister, H G']"),]
-
-replacer <- function(x) {
-  return(str_replace_all(x, "[[:punct:]]", ""))
+###
+#most common country
+get_most_common_country <- function(countries) {
+  countries <- str_split(countries, ",")[[1]]
+  most_common_country <- names(which.max(table(trimws(countries))))
+  return(most_common_country)
 }
 
-#------------------------------- BIS HIER PAPER
+df_countries_group$country <- sapply(df_countries_group$country, get_most_common_country)
+table(df_countries_group$country)
+###
 
-# zuerst "authors_corrected.R" ausführen
+# Assign "other" to countries that contain [?]|none|BE|CA|DK|EU, or that have zero length
+df_countries_group$country <- ifelse(grepl("[?]|none|BE|CA|DK|EU", df_countries_group$country) | nchar(df_countries_group$country) == 0, "other", df_countries_group$country)
 
-# Spalte "authors_corrected" ersetzen
-paper$authors_corrected <- aut_check$authors_corrected
-
-#------------------------------
-# Papers-Anzahl pro Autor
-
-authors_title <- paper[, c("authors_corrected", "title")]
-authors_counter <- separate_rows(authors_title, authors_corrected, sep = ",")
-authors_counter$authors_corrected <- str_replace_all(authors_counter$authors_corrected, "[[:punct:]]", "")
-authors_counter$authors_corrected <- apply(authors_counter["authors_corrected"], 1, function(x) gsub("^\\s+", "", x))
-
-paper_count <- authors_counter %>%
+paper_count <- authors_counter %>%  ##SE TOTALIZAN LOS PAPERS POR AUTOR
   group_by(authors_corrected) %>%
-  summarise(Papers = n())
+  summarise(Papers = n()) %>%
+  left_join(authors_counter %>% select(authors_corrected, country), by = "authors_corrected") %>%
+  distinct(authors_corrected, .keep_all = TRUE)
 
-#names(paper_count)[names(paper_count) == "authors_corrected"] <- "label"  # Spalte Name verändern
+paper_count$country <- df_countries_group$country ##ASIGNAR LA CLASIFICACION 5 PAISES + other
 
-#rm(authors_title, authors_counter)
+table(paper_count$country)
 
 #------------------------------
 # CO-AUTHOR NETWORK
 paper.coauthor <- paper
+
+replacer <- function(x) {
+  return(str_replace_all(x, "[[:punct:]]", ""))
+}
 
 # 1. NODES (AUTHORS)
 
@@ -105,15 +66,14 @@ paper.coauthor <- lapply(paper.coauthor, replacer) # replacer function: Semikolo
 paper.coauthor[[10]]
 
 # create the node set (alphabetized)
-paper.coauthor.unique <- unique(unlist(paper.coauthor))[order(unique(unlist(paper.coauthor)))] # unique() delete the duplicate values
-# unlist() takes a list as an argument and returns a vector (elements of the same data type)
+paper.coauthor.unique <- unique(unlist(paper.coauthor))[order(unique(unlist(paper.coauthor)))]
 
 # 2. EDGES (CO-AUTHORSHIPS)
 paper.bipartite.edges <- lapply(paper.coauthor, function(x) {paper.coauthor.unique  %in% x})
 paper.bipartite.edges <- do.call("cbind", paper.bipartite.edges) # dimension is number of authors x number of papers
 rownames(paper.bipartite.edges) <- paper.coauthor.unique
 
-paper.mat <- paper.bipartite.edges %*% t(paper.bipartite.edges) #bipartite to unimode ### t() to calculate transpose of a matrix or Data Frame
+paper.mat <- paper.bipartite.edges %*% t(paper.bipartite.edges) #adjacency matrix 
 mat <- paper.mat[order(rownames(paper.mat)), order(rownames(paper.mat))]
 
 # 3. NETWORK
@@ -125,38 +85,65 @@ paper.statnet %e% "edge.lwd"
 plot.network(paper.statnet, edge.col <- "gray", edge.lwd = "edge.lwd", label = "vertex.names", label.cex = .5, label.pad = 0, label.pos = 1)
 
 # INTERACTIVE VISUALIZATION
-edges <- data.frame(from=data.frame(as.edgelist(paper.statnet))$X1, 
-                    to=data.frame(as.edgelist(paper.statnet))$X2, 
-                    value=(paper.statnet %e% "edge.lwd"))
+edges <- data.frame(from = data.frame(as.edgelist(paper.statnet))$X1, 
+                    to = data.frame(as.edgelist(paper.statnet))$X2, 
+                    value = (paper.statnet %e% "edge.lwd"))
 
 nodes <- data.frame(id = 1:length(paper.statnet%v%"vertex.names"),
-                    label = paper.statnet%v%"vertex.names",
-                    title = paper_count$Papers) ## NAMEN ÜBERPRÜFEN HIER
+                    label = paper.statnet%v%"vertex.names", ## NAMEN ÜBERPRÜFEN HIER
+                    title = paper_count$Papers,
+                    country = paper_count$country) 
+
 
 # Interactive Network
+countries_colors <- c("#8dd3c7", "#FFFF4F", "#bebada", "#80b1d3", "#fdb462", "#b3de69")
 
-# Nodes-Size-Skalierung
-#nodes$size_log <- 20 + 40 * (log(nodes$Number_Papers) - min(log(nodes$Number_Papers))) / (max(log(nodes$Number_Papers)) - min(log(nodes$Number_Papers)))
+nodes$color <- ifelse(nodes$country == "AT", countries_colors[1],
+                      ifelse(nodes$country == "CZ", countries_colors[2],
+                             ifelse(nodes$country == "DE", countries_colors[3],
+                                    ifelse(nodes$country == "FR", countries_colors[4],
+                                           ifelse(nodes$country == "SE", countries_colors[5],
+                                                  countries_colors[6]
+                                           )))))
 
-plot_interactive <- visNetwork(nodes = nodes, edges = edges, main = "Co-Author Network", width = 900, height = 900) %>% 
-  visPhysics(solver = "barnesHut") %>%  #barnesHut, forceAtlas2Based --> AUCH PASST
-  #visIgraphLayout(layout = "layout_nicely", type = "full") %>%
-  #visNodes(size = "size_log", color = list(highlight = "red")) %>% 
+plot_interactive <- visNetwork(nodes = nodes, edges = edges, main = "Co-Author Network", width = 800, height = 700) %>% 
+  visPhysics(solver = "barnesHut") %>%
   visNodes(color = list(highlight = "red")) %>% 
-  visEdges(selectionWidth = 10, color = list(highlight = "#2B7CE9"), smooth = FALSE) %>% #smooth = FALSE --> improve the performance
-  visOptions(nodesIdSelection = list(enabled  = TRUE, main = "Select by Author", style = "width:200px"),
+  visLegend(stepY = 70, addNodes = list(
+    list(label = "Austria", shape = "icon",
+         icon = list(code ="25CF", size = 25, color = "#8dd3c7")),
+    list(label = "Czech Republic", shape = "icon",
+         icon = list(code ="25CF", size = 25, color = "#FFFF4F")),
+    list(label = "Germany", shape = "icon",
+         icon = list(code ="25CF", size = 25, color = "#bebada")),
+    list(label = "France", shape = "icon",
+         icon = list(code ="25CF", size = 25, color = "#80b1d3")),
+    list(label = "Sweden", shape = "icon",
+         icon = list(code ="25CF", size = 25, color = "#fdb462")),
+    list(label = "other", shape = "icon",
+         icon = list(code ="25CF", size = 25, color = "#b3de69"))), 
+    useGroups = FALSE) %>% 
+  visEdges(selectionWidth = 10, color = list(highlight = "red"), smooth = FALSE) %>% #smooth = FALSE --> improve the performance
+  visOptions(highlightNearest = TRUE, nodesIdSelection = list(enabled  = TRUE, main = "Select by Author", style = "width:200px"),
              selectedBy = list(variable = "title", main = "Select by Number of Papers", style = "width:200px")) %>%
   visInteraction(hover = TRUE, tooltipDelay = 10)
 
-plot_interactive
+plot_interactive 
 
-# save as html
-visSave(plot_interactive, "coauthor_network.html", selfcontained = T)
+visSave(plot_interactive, "output/coauthor_network.html", selfcontained = T)
 
-# igraph instead of statnet package
-#paper.igraph <- intergraph::asIgraph(paper.statnet, vnames="vertex.names", vertex.size = 30)
-#visIgraph(paper.igraph)
+#------------------------------
+# earliest paper for each country
+df_jahr <- paper %>%
+  group_by(country) %>%
+  summarize(year = min(year)) %>%
+  left_join(paper, by = c("country", "year")) %>%
+  select(year, country, authors_corrected, doi.url)
 
+write.xlsx(df_jahr, file = here::here("output", "df_jahr.xlsx"))
 
-
-
+#------------------------------
+# country NULL or ?
+country_check <- paper %>%
+  filter(country %in% c(NULL, "?", "none", "other")) %>%
+  select(year, country, authors_corrected, doi.url)
