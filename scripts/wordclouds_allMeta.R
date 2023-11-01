@@ -180,3 +180,12 @@ wordcloud(words = df$word, freq = df$freq, min.freq = 7,                 # min.f
 dev.off()
 
 
+################################################################################
+# write final data set to disk
+
+df_out_final <- paper %>% select(authors_corrected, title, year, Journal, 
+                                 doi.url, abstract, keywords, categories_scimagojr)
+colnames(df_out_final) <- c("authors", "title", "year", "journal", "doi/url", 
+                            "abstract", "keywords", "cat_scimagojr")
+
+write.csv(df_out_final, "final_ds_metadata.csv")
