@@ -3,8 +3,8 @@
 #library(scholar) # Provides functions to extract citation data from Google Scholar
 library(networkDynamic)
 library(ndtv)
-library(igraph)
 library(statnet)
+library(igraph)
 library(intergraph)
 library(visNetwork)
 library(stringr)

@@ -1,45 +1,3 @@
-# TODO
-# Study region Paper nochmal ansehen; habitat and land-use polygons ansehen DONE
-# -> Sihe Notes
-# Difference spatial unit of analys farm (6) und thematic info used farm (3) DONE
-# -> plots description
-
-# Eventuell neue Plots mit Kategorien pro Jahr 
-
-
-#Datasets combined zusammengefasst; 2 keine Kategorie weil unclear
-
-# Finale Tabelle rausschreiben. welches skript? 
-# Welche Tabellen sollen geteilt werden? Metadaten mit Exlusions?
-
-# numbers for FLowchart; Zahlen anpassen
-# Done Zahlen angepasst 
-
-# papers wieder includieren und aus dem exlusion datensatz nehmen 
-# DONE
-
-# TODO Datasets kategorisieren dokumentieren Text; 
-# Doppelte Klassifizierung wird eventuell überschrieben aktuell
-# Was tun wenn Datensatz nicht angegeben ist ? z.B. land cover data? 
-
-# TODO Tabelle wie im Protocol Paper zu yes/no und thematic usw. Großbuchstabe 
-# am Anfang
-# str_to_title() -> erster Buchstabe zu Großbuchstabe
-
-# Projekt teilen via Gitbucket -> Github
-# DONE
-
-# TODO Fließtext
-
-# 16.1
-# Done! flow chart update 
-# Done! MEtadaten Abstract Wordclouds mehr Wörter; Sample Abstract Wordcloud mehr Wörter
-# TODO NAs nachsehen im Paper -> both unclear -> Remove 
-# TODO Paper zusammen kopieren 
-# TODO + Flowchart; Details zur Suchstrategie und Ergebnissen 
-# Nach EAAE:
-# TODO Indicatoren aufräumen
-
 ################################################################################
 library(ggplot2)
 library(dplyr)
@@ -49,6 +7,18 @@ library(kableExtra)
 extraction_all <- read.csv('input/all_extracted_Heidis_Nacharbeit_.csv', sep=',', encoding = 'UTF-8')
 #indicators_all <- read.csv('input/indicators_all.csv', sep=';', encoding = 'UTF-8')
 #datasets_all <- read.csv('input/datasets_all.csv', sep=';', encoding = 'UTF-8')
+country_c <- paper[paper$doi.url %in% extraction_all$doi, "country"]
+# two papers not in doi; add countries manually
+country_c <- c(country_c, "DE")
+country_c <- c(country_c, "FR")
+table(country_c)
+extraction_all[!(extraction_all$doi %in% paper$doi.url), 3]
+
+
+correct_meta_sample <- paper[paper$doi.url %in% extraction_all$doi,]
+correct_meta_sample <- rbind(correct_meta_sample, paper[grep(paper$title, pattern="Spatial configuration and landscape context"),])
+correct_meta_sample <- rbind(correct_meta_sample, paper[grep(paper$title, pattern="A Two-Branch CNN Architecture for Land Cover "),])
+
 ####################################
 # find water and medical papers
 
@@ -135,7 +105,7 @@ spatial_unit_analysis[spatial_unit_analysis == 'network of plots']  = 'network o
 spatial_unit_analysis[spatial_unit_analysis == 'network of farms']  = 'network of plots/farms'
 spatial_unit_analysis[spatial_unit_analysis == 'habitat and land-use polygons']  = 'habitat'
 spatial_unit_analysis[spatial_unit_analysis == 'study sites']  = 'landscape'
-
+spatial_unit_analysis[which(spatial_unit_analysis=="plot/block")] = 'parcel'
 table(spatial_unit_analysis)
 table(spatial_unit_analysis) %>% 
   as.data.frame() %>% rename(., 'count'= "Freq", 
@@ -233,10 +203,50 @@ jpeg("output/figures_plots/year_data_use.jpeg",
 
 
 ggplot(data = df_year, aes(x=year_data_use)) + 
-  geom_histogram(bins = 70) + xlab('year of data use')
+  #geom_histogram(bins = 70) + 
+  geom_bar() +
+  xlab('year of data use') + 
+  scale_x_continuous(breaks=seq(1998, 2019, 1)) +
+  theme(axis.text.x = element_text(angle = 45, vjust = 0.5, hjust=0.5)) 
+
+dev.off()
+################################################################################
+# year of paper
+correct_meta_sample[which(correct_meta_sample$country != 'DE' & 
+                            correct_meta_sample$country != 'FR' & 
+                            correct_meta_sample$country != 'SE' & 
+                            correct_meta_sample$country != 'CZ' & 
+                            correct_meta_sample$country != 'AT'),"country"] = 'other'
+
+counted_yr_country <- correct_meta_sample %>% group_by(year, country) %>% summarise(ct = n())
+counted_yr_country$country <- factor(counted_yr_country$country, 
+                                     levels = c("AT", "CZ", "DE", "FR", "SE", "other"))
+
+jpeg("output/figures_plots/year_pub_country.jpeg", 
+     
+     width = 20, height = 15, quality = 100, units = "cm",res= 300,
+     
+     type = "cairo")
+
+ggplot(counted_yr_country, aes( x=year, y=ct, fill=country)) + 
+  #geom_col(position = "stack") +
+  geom_col(position = "stack") +
+  
+  ylab("count") + 
+  scale_x_continuous(breaks=seq(2002, 2021, 1))+
+  scale_y_continuous(breaks=seq(0, 10, 1)) +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 45, vjust = 0.5, hjust=0.5)) +
+  scale_fill_brewer(palette="Set2")
 
 dev.off()
 
+extraction_all$Year %>% table()
+
+extraction_all[which(extraction_all$Authors == "['Ronnenberg, Katrin', 'Ronnenberg  Egbert ; Siebert, Ursula, Katrin ; StrauÃŸ', 'Ronnenberg, Katrin']" ), "Discussion.of.IACS.dataset..verbatim"]
+extraction_all$Discussion.of.IACS.dataset..verbatim
+str_detect(extraction_all$Discussion.of.IACS.dataset..verbatim, pattern = 'level') %>% sum(., na.rm = TRUE)
+extraction_all[str_detect(extraction_all$Discussion.of.IACS.dataset..verbatim, pattern = 'level'), ]
 ################################################################################
 # Sample: collect count/shares information about y/n variables & importance variable; 
 # create table or graph, descriptive text
@@ -263,3 +273,100 @@ extraction_all %>% group_by(Raw.info.used..time) %>%
   summarise(n = n())
 
 
+################################################################################
+# Authors
+
+authors = c()
+years = c()
+
+for(row in 1:nrow(correct_meta_sample)){
+  
+  cat = correct_meta_sample[row, "authors_corrected"]
+  #print(cat)
+  year = correct_meta_sample[row, "year"]
+  splitted = str_split(cat, ',')
+  #print(splitted)f
+  for(index in 1:length(splitted[[1]])) {
+    #print(string)
+    cleaned = str_replace_all(splitted[[1]][index], "[[:punct:]]", "")
+    #cleaned = str_replace_all(cleaned, " *", "")
+    cleaned = str_squish(cleaned)
+    #print(cleaned)
+    if(cleaned=="Schmid E") {
+      print(correct_meta_sample[row,])
+    }
+    #cleaned = substr(cleaned,1,nchar(cleaned)-2)
+    years = c(years, year)
+    authors = c(authors, cleaned)
+    #print(cleaned)
+    if(cleaned == "and Optics"){
+      #print(paste(index, splitted))
+      #print(cat)
+    }
+  }
+}
+author_df <- data.frame('year' = years, 'cat' = authors)
+grouped <- author_df %>% group_by(cat) %>% summarise(n = n())
+ordered <- grouped[order(grouped$n, decreasing = T)[1:21],] 
+ordered$cat <- factor(ordered$cat, levels=ordered$cat)
+
+jpeg("output/figures_plots/authors_count_21.jpeg", 
+     
+     width = 20, height = 15, quality = 100, units = "cm",res= 300,
+     
+     type = "cairo")
+
+ordered %>% ggplot(., aes(y=n, x=cat)) + geom_boxplot() + theme_bw() +
+  theme(axis.text.x = element_text(angle = 45, vjust = 0.5, hjust=0.5)) +
+  scale_y_continuous(breaks=seq(0,10,1)) + ylab("count") + 
+  theme(axis.title.x=element_blank()) 
+
+dev.off()
+
+
+################################################################################
+# split up the category string
+categories = c()
+years = c()
+for(row in 1:nrow(correct_meta_sample)){
+  cat = correct_meta_sample[row, "categories_scimagojr"]
+  year = correct_meta_sample[row, "year"]
+  splitted = str_split(cat, ';')
+  for(index in 1:length(splitted[[1]])) {
+    #print(string)
+    cleaned = str_replace_all(splitted[[1]][index], "[[:punct:]]", "")
+    #cleaned = str_replace_all(cleaned, " *", "")
+    cleaned = str_squish(cleaned)
+    cleaned = substr(cleaned,1,nchar(cleaned)-2)
+    years = c(years, year)
+    categories = c(categories, cleaned)
+    #print(cleaned)
+    if(cleaned == "and Optics"){
+      print(paste(index, splitted))
+      print(cat)
+    }
+  }
+}
+
+cat_years <- data.frame('year' = years, 'cat' = categories)
+grouped <- cat_years %>% group_by(cat, year) %>% summarise(n = n())
+
+
+grouped <- cat_years %>% group_by(cat) %>% summarise(n = n())
+ordered <- grouped[order(grouped$n, decreasing = T)[1:26],] 
+#ordered <- ordered[-which(ordered$cat=='no mat'),]
+ordered$cat <- factor(ordered$cat, levels=ordered$cat)
+
+
+jpeg("output/figures_plots/categories.jpeg", 
+     
+     width = 20, height = 15, quality = 100, units = "cm",res= 300,
+     
+     type = "cairo")
+
+ordered %>% ggplot(., aes(y=n, x=cat)) + geom_boxplot() + theme_bw() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=0.5)) +
+  scale_y_continuous(breaks=seq(1,10,1)) + ylab('count') + 
+  theme(axis.title.x=element_blank())
+
+dev.off()

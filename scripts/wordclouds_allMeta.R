@@ -13,8 +13,8 @@ library(Rcpp)
 library(kableExtra)
 
 
-
-paper = read.csv('input/Meta_all/papers_and_exlusions.csv', sep=',', encoding="UTF-8")
+# use the correction script by Paula 
+#paper = read.csv('input/Meta_all/papers_and_exlusions.csv', sep=',', encoding="UTF-8")
 paper$abstract
 
 ################################################################################
@@ -41,6 +41,11 @@ docs <- tm_map(docs, toEmpty, "˜")
 docs <- tm_map(docs, toEmpty, "¦")
 docs <- tm_map(docs, toEmpty, "–")
 docs <- tm_map(docs, toEmpty, "RQ")
+docs <- tm_map(docs, toEmpty, "can")
+docs <- tm_map(docs, toEmpty, "due")
+docs <- tm_map(docs, toEmpty, "der")
+docs <- tm_map(docs, toEmpty, "may")
+
 
 docs = tm_map(docs, content_transformer(tolower)) # lowercase 
 docs = tm_map(docs, removeNumbers) # numbers

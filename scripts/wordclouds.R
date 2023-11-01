@@ -12,7 +12,7 @@ library(Rcpp)
 setwd("D:/ForLand/2_coauthor_network")
 getwd()
 
-extraction_all <- read.csv('input/Extraction_sheet_all.csv', sep=';', encoding = 'UTF-8')
+extraction_all <- read.csv('input/all_extracted_Heidis_Nacharbeit_.csv', sep=',', encoding = 'UTF-8')
 ################################################################################
 # ABSTRACT
 text_1 <- extraction_all$Abstract 
@@ -39,6 +39,8 @@ docs <- tm_map(docs, toEmpty, "˜")
 docs <- tm_map(docs, toEmpty, "¦")
 docs <- tm_map(docs, toEmpty, "–")
 docs <- tm_map(docs, toEmpty, "RQ")
+#docs <- tm_map(docs, toEmpty, "...")
+
 
 docs = tm_map(docs, content_transformer(tolower)) # lowercase 
 docs = tm_map(docs, removeNumbers) # numbers
@@ -91,6 +93,8 @@ wordcloud(words = df$word, freq = df$freq, min.freq = 5,                 # min.f
 dev.off()
 ################################################################################
 # RESEARCH QUESTIONS
+extraction_all <- read.csv('input/research questions_Stefan_v02_.csv')
+
 text_1 <- extraction_all$Research.question.s...aim.s...verbatim 
 
 taboo_words <- c("study", "aim")
@@ -110,12 +114,17 @@ docs <- tm_map(docs, toEmpty, "€")
 docs <- tm_map(docs, toEmpty, "â")
 docs <- tm_map(docs, toEmpty, "™")
 docs <- tm_map(docs, toEmpty, "iii)")
+docs <- tm_map(docs, toEmpty, "iii")
 docs <- tm_map(docs, toEmpty, "ii)")
 docs <- tm_map(docs, toEmpty, "i)")
 docs <- tm_map(docs, toEmpty, "˜")
 docs <- tm_map(docs, toEmpty, "¦")
 docs <- tm_map(docs, toEmpty, "can")
 docs <- tm_map(docs, toEmpty, "RQ")
+docs <- tm_map(docs, toEmpty, "I")
+docs <- tm_map(docs, toEmpty, "–")
+docs <- tm_map(docs, toEmpty, "•")
+docs <- tm_map(docs, toEmpty, "…")
 
 docs = tm_map(docs, content_transformer(tolower)) # lowercase 
 docs = tm_map(docs, removeNumbers) # numbers
@@ -129,19 +138,20 @@ words <- sort(rowSums(matrix),decreasing=TRUE)
 df <- data.frame(word = names(words),freq=words)
 
 
-jpeg("output/figures_plots/WordCloud_RQs.jpeg", 
+jpeg("output/figures_plots/WordCloud_RQs_5.jpeg", 
      
      width = 20, height = 15, quality = 100, units = "cm",res= 300,
      
      type = "cairo")
 
 set.seed(1234)
-wordcloud(words = df$word, freq = df$freq, min.freq = 4,                 # min.freq anpassen, 1 oder 2
-          max.words=150, random.order=FALSE, rot.per=0.35, 
+wordcloud(words = df$word, freq = df$freq, min.freq = 5,                 # min.freq anpassen, 1 oder 2
+          max.words=1000, random.order=FALSE, rot.per=0.35, 
           colors=brewer.pal(8, "Dark2"))
 
 dev.off()
 
+df[which(df$freq > 5),] %>% write.csv('output/word_freq_RQ.csv')
 ################################################################################
 # Content related purpose
 text_1 <- extraction_all$Content.related.purpose.of.IACS.data..verbatim 

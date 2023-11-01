@@ -3,6 +3,7 @@ library(dplyr)
 library(stringr)
 library(kableExtra)
 library(magick)
+library(RColorBrewer)
 # webshot::install_phantomjs()
 ################################################################################
 # numbers
@@ -443,11 +444,15 @@ jpeg("output/figures_plots_allMeta/year_pub_country.jpeg",
 counted_yr_country$country <- factor(counted_yr_country$country, 
                                      levels = c("AT", "CZ", "DE", "FR", "SE", "other"))
 
-ggplot(counted_yr_country, aes(fill=country, y=ct, x=year)) + 
-  scale_x_continuous(breaks=2002:2021) +
-  geom_bar(position="stack", stat="identity") + 
+ggplot(counted_yr_country, aes( x=year, y=ct, fill=country)) + 
+  #geom_col(position = "stack") +
   geom_col(position = "stack") +
-  ylab("count") + theme_bw()
+  
+  ylab("count") + 
+  scale_x_continuous(breaks=seq(2002, 2021, 1))+
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 45, vjust = 0.5, hjust=0.5)) +
+  scale_fill_brewer(palette="Set2")
 
 dev.off()
 ################################################################################
